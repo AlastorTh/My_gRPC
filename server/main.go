@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 
-	My_gRPC "github.com/AlastorTh/My_gRPC/my_gRPC"
 	pb "github.com/AlastorTh/My_gRPC/my_gRPC"
 	"google.golang.org/grpc"
 )
@@ -19,43 +18,51 @@ type server struct {
 }
 
 func (s *server) Send(ctx context.Context, in *pb.SendRequest) (*pb.SendResponse, error) {
+	var res float32
 	switch s.operation {
 	case "add":
-		log.Printf("%f + %f\n", in.GetPrm1(), in.GetPrm2())
-		return &pb.SendResponse{Result: in.GetPrm1() + in.GetPrm2()}, nil
+		res = in.GetPrm1() + in.GetPrm2()
+		log.Printf("%f + %f = %f\n", in.GetPrm1(), in.GetPrm2(), res)
+		return &pb.SendResponse{Result: res}, nil
 	case "sub":
-		log.Printf("%f - %f\n", in.GetPrm1(), in.GetPrm2())
-		return &pb.SendResponse{Result: in.GetPrm1() - in.GetPrm2()}, nil
+		res = in.GetPrm1() - in.GetPrm2()
+		log.Printf("%f - %f = %f\n", in.GetPrm1(), in.GetPrm2(), res)
+		return &pb.SendResponse{Result: res}, nil
 	case "mul":
-		log.Printf("%f * %f\n", in.GetPrm1(), in.GetPrm2())
-		return &pb.SendResponse{Result: in.GetPrm1() * in.GetPrm2()}, nil
+		res = in.GetPrm1() * in.GetPrm2()
+		log.Printf("%f * %f = %f\n", in.GetPrm1(), in.GetPrm2(), res)
+		return &pb.SendResponse{Result: res}, nil
 	case "div":
-		log.Printf("%f / %f\n", in.GetPrm1(), in.GetPrm2())
+		if in.GetPrm2() == 0 {
+			return nil, errors.New("Division by zero not allowed!")
+		}
+		res = in.GetPrm1() / in.GetPrm2()
+		log.Printf("%f / %f = %f\n", in.GetPrm1(), in.GetPrm2(), res)
 		return &pb.SendResponse{Result: in.GetPrm1() / in.GetPrm2()}, nil
 	default:
-		log.Println("Not a valid operation")
-		return nil, errors.New("Operation not valid; please use add, sub, mul, div")
+		log.Fatal("Not a valid operation")
+		return nil, errors.New("Type Error here")
 	}
 
 }
 
 func main() {
 	flag.Parse()
-	if flag.NArg() < 2 {
+	if flag.NArg() < 2 { //checking the num of args
 		log.Fatalln("Invalid num of args: <port> <arithm. operation>")
 	}
 
 	port := os.Args[1]
 	operation := os.Args[2]
 
-	lis, err := net.Listen("tcp", ":"+port)
+	lis, err := net.Listen("tcp", ":"+port) // listen for server
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	srv := &server{operation: operation}
-	My_gRPC.RegisterDatabusServiceServer(grpcServer, srv)
+	srv := &server{operation: operation} // create + initialize struct with operation cmd argument
+	pb.RegisterDatabusServiceServer(grpcServer, srv)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)
 	}
