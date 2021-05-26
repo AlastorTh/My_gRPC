@@ -1,0 +1,24 @@
+syntax = "proto3";
+package my_gRPC;
+option go_package = "github.com/AlastorTh/My_gRPC";
+
+service DatabusService
+{
+    //!< Sends data to the bus.
+    rpc Send (SendRequest) returns (SendResponse);
+    //!< Receives data from the bus.
+}
+
+message SendRequest
+{
+    //!< Keeps a type of message.
+    float prm1 = 1;
+    //!< Keeps a value.
+    float prm2 = 2;
+}
+
+message SendResponse
+{
+    //!< Keeps a status of request.
+    float result = 1;
+}
