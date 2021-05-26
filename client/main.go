@@ -22,12 +22,12 @@ func main() {
 
 	address := flag.Arg(0)
 
-	prm1, err := strconv.Atoi(flag.Arg(1))
+	prm1, err := strconv.ParseFloat(flag.Arg(1), 32)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	prm2, err := strconv.Atoi(flag.Arg(2))
+	prm2, err := strconv.ParseFloat(flag.Arg(2), 32)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -47,6 +47,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not Send: %v", err)
 	}
-	log.Println(r.GetResult()) // retrieving res from client
+	log.Printf("%v", r.GetResult()) // retrieving res from client
 
 }
